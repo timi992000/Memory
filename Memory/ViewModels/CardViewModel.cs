@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace Memory.ViewModels
 {
@@ -21,5 +22,24 @@ namespace Memory.ViewModels
       private set => Set(value);
     }
 
+    public Border Border
+    {
+      get => Get<Border>();
+      set => Set(value);
+    }
+
+    internal void SwapCard(System.Windows.Controls.Image image)
+    {
+      if(Card.IsOpen)
+      {
+        image.Source = Card.ClosedImage;
+        Card.IsOpen = false;
+      }
+      else
+      {
+        image.Source = Card.OpenImage;
+        Card.IsOpen = true;
+      }
+    }
   }
 }

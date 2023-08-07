@@ -10,13 +10,14 @@ namespace Memory.Core.Entities
 {
   public class CardEntity
   {
-    public CardEntity(int cardId, int pairId, int row, int column, BitmapImage cardImage)
+    public CardEntity(int cardId, int pairId, int row, int column, BitmapImage openImage, BitmapImage closedImage)
     {
       CardId = cardId;
       PairId = pairId;
       Row = row;
       Column = column;
-      CardImage = cardImage;
+      OpenImage = openImage;
+      ClosedImage = closedImage;
     }
 
     /// <summary>
@@ -45,10 +46,11 @@ namespace Memory.Core.Entities
     public int Column { get; set; }
 
     /// <summary>
-    /// CardImage, the image the card is fill with
+    /// OpenImage, the image the card is fill with
     /// </summary>
-    public BitmapImage CardImage { get; set; }
+    public BitmapImage OpenImage { get; set; }
 
-    public BitmapImage CardBackground { get; set; }
+    public BitmapImage ClosedImage { get; set; }
+    public bool IsFinished { get; set; }
   }
 }
