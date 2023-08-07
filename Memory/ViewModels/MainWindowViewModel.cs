@@ -3,6 +3,7 @@ using Memory.Core.Entities;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -17,9 +18,9 @@ namespace Memory.ViewModels
       __Init();
     }
 
-    public Canvas GameField
+    public Grid GameField
     {
-      get => Get<Canvas>();
+      get => Get<Grid>();
       set => Set(value);
     }
 
@@ -57,11 +58,16 @@ namespace Memory.ViewModels
 
     private void __DrawGameField()
     {
-      var canvas = new Canvas();
+      var grid = new Grid();
       var maxRows = Math.Round(Math.Sqrt(_CardViewModels.Count));
+      for (int i = 0; i < maxRows; i++)
+      {
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+      }
+      grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
       int cardSize = 200;
-      int cardSpacing = 50;
+      int cardSpacing = 10;
 
       int rowCounter = 0;
       int columnCounter = 0;
@@ -70,6 +76,7 @@ namespace Memory.ViewModels
         if (rowCounter == maxRows)
         {
           columnCounter++;
+          grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
           rowCounter = 0;
         }
 
@@ -77,6 +84,7 @@ namespace Memory.ViewModels
         cardVm.Card.Column = columnCounter;
 
         var border = new Border();
+        border.Margin = new Thickness(0, 0, cardSpacing, cardSpacing);
         border.Width = cardSize;
         border.Height = cardSize;
         border.BorderBrush = Brushes.Black;
@@ -88,13 +96,13 @@ namespace Memory.ViewModels
           Child = new Button { Content = new Image { Source = cardVm.Card.CardImage } }
         };
 
-        Canvas.SetLeft(border, columnCounter * cardSize);
-        Canvas.SetTop(border, rowCounter * cardSize);
-        canvas.Children.Add(border);
+        Grid.SetColumn(border, columnCounter);
+        Grid.SetRow(border, rowCounter);
+        grid.Children.Add(border);
         rowCounter++;
       }
 
-      GameField = canvas;
+      GameField = grid;
     }
 
     private string[] __GetImagesForCards()
