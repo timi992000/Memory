@@ -1,20 +1,18 @@
 ﻿using Memory.Core.Baseclasses;
 using Memory.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace Memory.ViewModels
 {
-  internal class CardViewModel : ViewModelBase
+  public class CardViewModel : ViewModelBase
   {
     public CardViewModel(CardEntity card)
     {
       Card = card;
     }
+
+    public Visibility IsVisible => Card.IsFinished ? Visibility.Hidden : Visibility.Visible;
 
     public CardEntity Card
     {
@@ -22,24 +20,36 @@ namespace Memory.ViewModels
       private set => Set(value);
     }
 
-    public Border Border
+    public BitmapImage CardContent
     {
-      get => Get<Border>();
+      get => Card.IsOpen ? Card.OpenImage : Card.ClosedImage;
+    }
+
+    public Thickness CardMargin
+    {
+      get => Get<Thickness>();
       set => Set(value);
     }
 
-    internal void SwapCard(System.Windows.Controls.Image image)
+    public double CardSize
     {
-      if(Card.IsOpen)
-      {
-        image.Source = Card.ClosedImage;
+      get => Get<double>();
+      set => Set(value);
+    }
+    internal void SetFinished()
+    {
+      Card.IsOpen = false;
+      Card.IsFinished = true;
+      OnPropertyChanged(nameof(IsVisible));
+    }
+
+    internal void SwapCard()
+    {
+      if (Card.IsOpen)
         Card.IsOpen = false;
-      }
       else
-      {
-        image.Source = Card.OpenImage;
         Card.IsOpen = true;
-      }
+      OnPropertyChanged(nameof(CardContent));
     }
   }
 }
