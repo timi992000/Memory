@@ -12,11 +12,28 @@
           Height="{Binding CardSize}"
           BorderBrush="Black"
           BorderThickness="1"
-          Visibility="{Binding IsVisible}">
-    <Viewbox Width="{Binding CardSize}"
-             Height="{Binding CardSize}">
-      <Image Source="{Binding CardContent}"
-             MouseLeftButtonDown="__LeftButtonDown"/>
-    </Viewbox>
+          Visibility="{Binding IsVisible}"
+          CornerRadius="30">
+    <Grid>
+
+      <Border Name="mask"
+              Background="White"
+              CornerRadius="30" />
+
+      <StackPanel>
+
+        <StackPanel.OpacityMask>
+          <VisualBrush Visual="{Binding ElementName=mask}" />
+        </StackPanel.OpacityMask>
+
+        <Viewbox Width="{Binding CardSize}"
+                 Height="{Binding CardSize}">
+          <Image Source="{Binding CardContent}"
+                 MouseLeftButtonDown="__LeftButtonDown" />
+        </Viewbox>
+
+      </StackPanel>
+
+    </Grid>
   </Border>
 </UserControl>
