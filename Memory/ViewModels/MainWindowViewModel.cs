@@ -1,6 +1,8 @@
-﻿using Memory.Core.Baseclasses;
+﻿using MahApps.Metro.Controls;
+using Memory.Core.Baseclasses;
 using Memory.Core.Entities;
 using Memory.Core.Extender;
+using Memory.Entities;
 using Memory.Views;
 using System;
 using System.Collections.Generic;
@@ -15,10 +17,14 @@ namespace Memory.ViewModels
   public class MainWindowViewModel : ViewModelBase
   {
     private List<CardViewModel> _CardViewModels;
-    private int _PairCount = 15;
-    public MainWindowViewModel()
+    private Queue<Player> _playerQueue = new Queue<Player>();
+    private MetroWindow _metroWindow;
+    public MainWindowViewModel(MetroWindow metroWindow)
     {
-      __Init(_PairCount);
+      _metroWindow = metroWindow;
+      PairCount = 15;
+      PlayerCount = 2;
+      __Init();
     }
 
     public Viewbox GameField
@@ -27,11 +33,37 @@ namespace Memory.ViewModels
       set => Set(value);
     }
 
+    public int PairCount
+    {
+      get => Get<int>();
+      set => Set(value);
+    }
+
+    public int PlayerCount
+    {
+      get => Get<int>();
+      set => Set(value);
+    }
+
+    public Player CurrentPlayer
+    {
+      get => Get<Player>();
+      set => Set(value);
+    }
+
+    [DevDependsUpon(nameof(CurrentPlayer))]
+    public string CurrentPlayerText => $"{CurrentPlayer?.Name}'s  Turn ({CurrentPlayer?.PairCount} Pairs)";
+
     public int OpenedCards => _CardViewModels.Count(c => c.Card.IsOpen && !c.Card.IsFinished);
 
     internal void SwapCardIfPossible(CardViewModel cardVm)
     {
       __CheckAndHandleCardPair(cardVm);
+    }
+
+    public void Refresh()
+    {
+      __Init();
     }
 
     public void Execute_SwitchAll()
@@ -45,11 +77,12 @@ namespace Memory.ViewModels
 
     public void Execute_NewImages()
     {
-      __Init(_PairCount);
+      __Init();
     }
 
-    private void __Init(int pairs)
+    private void __Init()
     {
+      __ResetAndPreparePlayers();
       bool letCardsOpenAfterInit = _CardViewModels != null && _CardViewModels.All(c => c.Card.IsOpen);
       _CardViewModels = new List<CardViewModel>();
 
@@ -77,7 +110,7 @@ namespace Memory.ViewModels
       if (closedImage == null)
         closedImage = new BitmapImage();
 
-      for (int pairCount = 0; pairCount < pairs; pairCount++)
+      for (int pairCount = 0; pairCount < PairCount; pairCount++)
       {
         cardPairId++;
 
@@ -101,6 +134,27 @@ namespace Memory.ViewModels
         }
       }
       __DrawGameField();
+    }
+
+    private void __ResetAndPreparePlayers()
+    {
+      _playerQueue.Clear();
+      for (int i = 0; i < PlayerCount; i++)
+      {
+        var player = new Player()
+        {
+          Name = $"Player {i + 1}",
+          PairCount = 0,
+        };
+        _playerQueue.Enqueue(player);
+      }
+      __NextPlayer();
+    }
+
+    private void __NextPlayer()
+    {
+      CurrentPlayer = _playerQueue?.Dequeue();
+      _playerQueue?.Enqueue(CurrentPlayer);
     }
 
     private void __DrawGameField()
@@ -130,6 +184,7 @@ namespace Memory.ViewModels
 
     private void __CheckAndHandleCardPair(CardViewModel cardVm)
     {
+      //none or one card is open, so swap the other card
       if (OpenedCards < 2 || (OpenedCards == 2 && cardVm.Card.IsOpen))
         cardVm.SwapCard();
 
@@ -143,6 +198,26 @@ namespace Memory.ViewModels
         //Pair
         foreach (var openCard in openCards)
           openCard.SetFinished();
+        CurrentPlayer.PairCount++;
+        OnPropertyChanged(nameof(CurrentPlayerText));
+      }
+      else
+      {
+        //Not pair, next player
+        __NextPlayer();
+      }
+
+      __CheckWin();
+
+    }
+
+    private void __CheckWin()
+    {
+      if (_CardViewModels.All(c => c.Card.IsFinished))
+      {
+        var playerOrderedByPairs = _playerQueue.OrderByDescending(p => p.PairCount).ToList();
+        var resultList = string.Join("\n", playerOrderedByPairs.Select(p => $"{playerOrderedByPairs.IndexOf(p) + 1}. {p.Name} {p.PairCount} Pairs"));
+        ShowMessage($"{CurrentPlayer?.Name} won with {CurrentPlayer?.PairCount} pairs\n{resultList}", _metroWindow);
       }
     }
   }

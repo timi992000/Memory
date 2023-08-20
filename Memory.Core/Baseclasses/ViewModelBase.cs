@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,6 +9,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Memory.Core.Baseclasses
@@ -151,6 +154,16 @@ namespace Memory.Core.Baseclasses
       catch (Exception)
       {
       }
+    }
+
+    public void ShowMessage(string message, MetroWindow metroWindow)
+    => ShowMessage(message, "", metroWindow);
+    public void ShowMessage(string message, string title, MetroWindow metroWindow)
+    {
+      if (metroWindow != null)
+        metroWindow.ShowMessageAsync(title, message);
+      else
+        MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private string __GetPropertyName<T>(Expression<Func<T>> expression)
