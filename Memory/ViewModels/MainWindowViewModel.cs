@@ -16,6 +16,7 @@ namespace Memory.ViewModels
   {
     private List<CardViewModel> _CardViewModels;
     private int _PairCount = 15;
+    private int _NeedForPair = 2;
     public MainWindowViewModel()
     {
       __Init(_PairCount);
@@ -55,8 +56,7 @@ namespace Memory.ViewModels
 
       int cardPairId = 0;
       int cardId = 0;
-      int cardCountAsPair = 2;
-      int cardSize = 400;
+      int cardSize = 200;
       var cardSpacing = new Thickness(0, 0, 10, 10);
 
       BitmapImage closedImage = null;
@@ -86,7 +86,7 @@ namespace Memory.ViewModels
         openImage.UriSource = new Uri(@$"https://picsum.photos/{cardSize}?random{cardPairId}", UriKind.Absolute);
         openImage.EndInit();
 
-        for (int i = 0; i < cardCountAsPair; i++)
+        for (int i = 0; i < _NeedForPair; i++)
         {
           cardId++;
           var cardViewModel = new CardViewModel(
@@ -130,10 +130,10 @@ namespace Memory.ViewModels
 
     private void __CheckAndHandleCardPair(CardViewModel cardVm)
     {
-      if (OpenedCards < 2 || (OpenedCards == 2 && cardVm.Card.IsOpen))
+      if (OpenedCards < _NeedForPair || (OpenedCards == _NeedForPair && cardVm.Card.IsOpen))
         cardVm.SwapCard();
 
-      if (OpenedCards != 2)
+      if (OpenedCards != _NeedForPair)
         return;
 
       var openCards = _CardViewModels.Where(c => c.Card.IsOpen);
